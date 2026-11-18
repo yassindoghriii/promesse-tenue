@@ -1,0 +1,3 @@
+{"data":[{"type":"filing","id":"4242","attributes":{"fxo_id":"969500ALPHA-2023-12-31-ESEF-FR-0","country":"FR","period_end":"2023-12-31","date_added":"2024-04-10","json_url":"/969500ALPHA/2023-12-31/ESEF/FR/0/alpha-2023.json","report_url":"/969500ALPHA/2023-12-31/ESEF/FR/0/alpha-2023.xhtml","package_url":"/969500ALPHA/alpha.zip","error_count":0},"relationships":{"entity":{"data":{"type":"entity","id":"77"}}}}],
+ "included":[{"type":"entity","id":"77","attributes":{"name":"Alpha SA","identifier":"969500ALPHA"}}],
+ "links":{"next":null}}

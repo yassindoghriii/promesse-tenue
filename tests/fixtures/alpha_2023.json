@@ -1,0 +1,10 @@
+{"documentInfo":{"documentType":"https://xbrl.org/2021/xbrl-json"},
+ "facts":{
+  "f1":{"value":"1050000000","decimals":-6,"dimensions":{"concept":"ifrs-full:Revenue","entity":"scheme:969500ALPHA","period":"2023-01-01T00:00:00/2024-01-01T00:00:00","unit":"iso4217:EUR"}},
+  "f2":{"value":"1000000000","decimals":-6,"dimensions":{"concept":"ifrs-full:Revenue","entity":"scheme:969500ALPHA","period":"2022-01-01T00:00:00/2023-01-01T00:00:00","unit":"iso4217:EUR"}},
+  "f3":{"value":"600000000","decimals":-6,"dimensions":{"concept":"ifrs-full:Revenue","entity":"scheme:969500ALPHA","period":"2023-01-01T00:00:00/2024-01-01T00:00:00","unit":"iso4217:EUR","ifrs-full:SegmentsAxis":"alpha:FranceMember"}},
+  "f4":{"value":"260000000","decimals":-6,"dimensions":{"concept":"ifrs-full:Revenue","entity":"scheme:969500ALPHA","period":"2023-07-01T00:00:00/2024-01-01T00:00:00","unit":"iso4217:EUR"}},
+  "f5":{"value":"130000000","decimals":-6,"dimensions":{"concept":"ifrs-full:ProfitLossFromOperatingActivities","entity":"scheme:969500ALPHA","period":"2023-01-01T00:00:00/2024-01-01T00:00:00","unit":"iso4217:EUR"}},
+  "f6":{"value":"80000000","decimals":-6,"dimensions":{"concept":"ifrs-full:CashAndCashEquivalents","entity":"scheme:969500ALPHA","period":"2024-01-01T00:00:00","unit":"iso4217:EUR"}},
+  "f7":{"value":"Alpha SA","dimensions":{"concept":"ifrs-full:NameOfReportingEntityOrOtherMeansOfIdentification","entity":"scheme:969500ALPHA","period":"2024-01-01T00:00:00"}}
+ }}
