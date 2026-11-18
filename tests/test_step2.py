@@ -15,8 +15,26 @@ def test_zones_et_synchronisation_idempotente(tmp_path):
     (tmp_path / "esef" / "filings_FR.jsonl").write_text("{}\n")
     (tmp_path / ".gitkeep").write_text("")
 
-    assert sync_dir(s3, tmp_path, "bronze") == (2, 0)  # .gitkeep ignoré
-    assert sync_dir(s3, tmp_path, "bronze") == (0, 2)  # déjà à jour
+    assert sync_dir(s3, tmp_path, "bronze") == (2, 0, [])  # .gitkeep ignoré
+    assert sync_dir(s3, tmp_path, "bronze") == (0, 2, [])  # déjà à jour
     keys = {o["Key"] for o in s3.list_objects_v2(Bucket="bronze")["Contents"]}
     assert keys == {"esef/json/1.json", "esef/filings_FR.jsonl"}
     assert list_lake(s3)["bronze"][0] == 2
+
+
+@mock_aws
+def test_un_echec_n_arrete_pas_la_synchronisation(tmp_path):
+    from boto3.exceptions import S3UploadFailedError
+    s3 = boto3.client("s3", region_name="us-east-1")
+    ensure_zones(s3)
+    (tmp_path / "a.txt").write_text("a")
+    (tmp_path / "b.txt").write_text("b")
+    real = s3.upload_file
+
+    def flaky(filename, bucket, key, **kw):
+        if key == "a.txt":
+            raise S3UploadFailedError("InternalError")
+        return real(filename, bucket, key, **kw)
+
+    s3.upload_file = flaky
+    assert sync_dir(s3, tmp_path, "bronze", sleep=lambda s: None) == (1, 0, ["a.txt"])

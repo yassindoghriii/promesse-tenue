@@ -22,12 +22,22 @@ import logging
 import os
 from pathlib import Path
 
+import time
+
 import boto3
-from botocore.exceptions import ClientError
+from boto3.s3.transfer import TransferConfig
+from botocore.config import Config
+from botocore.exceptions import BotoCoreError, ClientError
+from boto3.exceptions import S3UploadFailedError
 
 from src.collect.esef_filings import _read_env
 
 ZONES = ("bronze", "silver", "gold")
+# Envoi des gros fichiers (rapports de 100+ Mo) : découpage en morceaux de 16 Mo, envoyés
+# 2 par 2 seulement pour ne pas saturer le serveur de stockage local.
+TRANSFER = TransferConfig(multipart_threshold=64 * 2**20, multipart_chunksize=16 * 2**20,
+                          max_concurrency=2)
+FILE_RETRIES = 3
 log = logging.getLogger("lake")
 
 
@@ -40,6 +50,8 @@ def get_client():
         aws_access_key_id=env["S3_ACCESS_KEY"],
         aws_secret_access_key=env["S3_SECRET_KEY"],
         region_name=env.get("S3_REGION", "us-east-1"),
+        config=Config(retries={"max_attempts": 10, "mode": "standard"},
+                      s3={"addressing_style": "path"}),
     )
 
 
@@ -61,17 +73,31 @@ def _remote_size(s3, bucket: str, key: str) -> int | None:
         return None
 
 
-def sync_dir(s3, local_dir: Path, bucket: str) -> tuple[int, int]:
-    """Envoie local_dir dans le bucket (même arborescence). Retourne (envoyés, ignorés)."""
+def sync_dir(s3, local_dir: Path, bucket: str, sleep=time.sleep) -> tuple[int, int, list[str]]:
+    """
+    Envoie local_dir dans le bucket (même arborescence).
+    Retourne (envoyés, déjà à jour, échecs). Un fichier en échec n'arrête pas les autres :
+    il est signalé et sera renvoyé au prochain lancement.
+    """
     sent = skipped = 0
+    failed: list[str] = []
     for f in sorted(p for p in local_dir.rglob("*") if p.is_file() and not p.name.startswith(".")):
         key = f.relative_to(local_dir).as_posix()
         if _remote_size(s3, bucket, key) == f.stat().st_size:
             skipped += 1
             continue
-        s3.upload_file(str(f), bucket, key)
-        sent += 1
-    return sent, skipped
+        for attempt in range(1, FILE_RETRIES + 1):
+            try:
+                s3.upload_file(str(f), bucket, key, Config=TRANSFER)
+                sent += 1
+                break
+            except (S3UploadFailedError, ClientError, BotoCoreError) as exc:
+                log.warning("échec envoi %s (tentative %s/%s) : %s", key, attempt, FILE_RETRIES, exc)
+                if attempt < FILE_RETRIES:
+                    sleep(5 * attempt)
+        else:
+            failed.append(key)
+    return sent, skipped, failed
 
 
 def list_lake(s3) -> dict[str, tuple[int, int]]:
@@ -101,8 +127,11 @@ def main() -> None:
         for zone in ("bronze", "silver"):
             d = args.data_dir / zone
             if d.exists():
-                sent, skipped = sync_dir(s3, d, zone)
-                log.info("%s : %s fichier(s) envoyé(s), %s déjà à jour", zone, sent, skipped)
+                sent, skipped, failed = sync_dir(s3, d, zone)
+                log.info("%s : %s fichier(s) envoyé(s), %s déjà à jour, %s échec(s)",
+                         zone, sent, skipped, len(failed))
+                for key in failed:
+                    log.error("NON ENVOYÉ : %s/%s (relancer la commande)", zone, key)
 
     print("\nContenu du data lake :")
     for zone, (n, size) in list_lake(s3).items():

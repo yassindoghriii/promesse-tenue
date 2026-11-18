@@ -109,8 +109,17 @@ def get_with_retry(session: requests.Session, url: str, params: dict | None = No
     erreur 5xx, on attend (durée indiquée par l'en-tête Retry-After, sinon 10 s, 20 s, 40 s…)
     puis on réessaie.
     """
+    resp = None
     for attempt in range(MAX_RETRIES):
-        resp = session.get(url, params=params, timeout=timeout)
+        try:
+            resp = session.get(url, params=params, timeout=timeout)
+        except (requests.ConnectionError, requests.Timeout) as exc:
+            # Coupure réseau ou serveur qui ferme la connexion : on réessaie aussi
+            wait = 10 * 2 ** attempt
+            log.warning("connexion interrompue (%s), nouvelle tentative dans %.0f s (%s/%s)",
+                        type(exc).__name__, wait, attempt + 1, MAX_RETRIES)
+            sleep(wait)
+            continue
         if resp.status_code != 429 and resp.status_code < 500:
             return resp
         retry_after = resp.headers.get("Retry-After")
@@ -118,6 +127,8 @@ def get_with_retry(session: requests.Session, url: str, params: dict | None = No
         log.warning("HTTP %s, nouvelle tentative dans %.0f s (%s/%s)",
                     resp.status_code, wait, attempt + 1, MAX_RETRIES)
         sleep(wait)
+    if resp is None:
+        raise requests.ConnectionError(f"impossible de joindre {url} après {MAX_RETRIES} tentatives")
     resp.raise_for_status()
     return resp
 

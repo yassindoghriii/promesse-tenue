@@ -45,7 +45,7 @@ def test_run_bout_en_bout(tmp_path):
     jdir.mkdir()
     (jdir / "4242.json").write_text((FIX / "alpha_2023.json").read_text())
     df = run(meta, jdir, tmp_path / "out.csv")
-    assert len(df) == 4  # CA 2022, CA 2023, résultat op. 2023, trésorerie 2023
+    assert len(df) == 4  # CA 2022, CA 2023, résultat op. 2023, trésorerie 2023 (tous >= 2019)
     assert set(df["entreprise"]) == {"Alpha SA"}
 
 
@@ -95,3 +95,44 @@ def test_perimetre_retrouve_les_lei_par_nom():
     assert {(r["nom"], r["lei"]) for r in found} == {("L'Oréal", "LEI1"), ("Michelin", "LEI2")}
     assert [r["nb_depots"] for r in found if r["lei"] == "LEI1"] == [2]
     assert missing == ["Danone"]
+
+
+def test_harmonize_ne_melange_pas_deux_notions():
+    from src.parse.xbrl_facts import harmonize
+    df = pd.DataFrame([
+        {"lei": "A", "indicateur": "capitaux_propres", "concept": "ifrs-full:Equity", "exercice": 2019},
+        {"lei": "A", "indicateur": "capitaux_propres", "concept": "ifrs-full:EquityAttributableToOwnersOfParent", "exercice": 2020},
+        {"lei": "A", "indicateur": "chiffre_affaires", "concept": "ifrs-full:Revenue", "exercice": 2020},
+        {"lei": "A", "indicateur": "chiffre_affaires", "concept": "ifrs-full:RevenueFromContractsWithCustomers", "exercice": 2021},
+        {"lei": "A", "indicateur": "tresorerie", "concept": "ifrs-full:CashAndCashEquivalents", "exercice": 2017},
+    ])
+    h = harmonize(df)
+    assert set(zip(h["indicateur"], h["exercice"])) == {
+        ("capitaux_propres", 2020), ("chiffre_affaires", 2020), ("chiffre_affaires", 2021)}
+
+
+def test_explore_trouve_les_extensions():
+    from src.parse.explore_concepts import explore
+    doc = {"facts": {"x": {"value": "43000000000", "dimensions": {
+        "concept": "sny:NetSales", "entity": "s:L", "unit": "iso4217:EUR",
+        "period": "2024-01-01T00:00:00/2025-01-01T00:00:00"}}}}
+    df = explore(doc, "sales")
+    assert df.iloc[0]["concept"] == "sny:NetSales" and df.iloc[0]["valeur_Md"] == 43.0
+
+
+def test_fetch_reessaie_apres_coupure_reseau():
+    import requests
+    from src.collect.esef_filings import get_with_retry
+
+    class S:
+        calls = 0
+
+        def get(self, *a, **k):
+            S.calls += 1
+            if S.calls == 1:
+                raise requests.ConnectionError("Remote end closed connection")
+            return _Resp(200)
+
+    waits = []
+    assert get_with_retry(S(), "https://x", sleep=waits.append).status_code == 200
+    assert waits == [10]
