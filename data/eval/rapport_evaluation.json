@@ -1,0 +1,69 @@
+{
+  "phrases_annotees": 59,
+  "non_traitees_par_llm": 1,
+  "vrais_positifs": 43,
+  "faux_positifs": 4,
+  "faux_negatifs": 5,
+  "vrais_negatifs": 7,
+  "precision": 0.915,
+  "rappel": 0.896,
+  "f1": 0.905,
+  "exactitude_echeance": 0.9534883720930233,
+  "exactitude_valeur_min": 0.813953488372093,
+  "erreurs": [
+    {
+      "entreprise": "DANONE",
+      "phrase": "RESPONSABILITÉ SOCIALE, SOCIÉTALE ET ENVIRONNEMENTALE 5.2 NATURE DANONE DOCUMENT D’ENREGISTREMENT UNIVERSEL 2022152 2030, défini dans le cadre de l’initiative RE100, un groupe international d’entreprises qui s’engagent à produire 100% d’électricité renouvelable.",
+      "verite": false,
+      "llm": true
+    },
+    {
+      "entreprise": "L'AIR LIQUIDE SOCIETE ANONYME POUR L'ETUDE ET L'EXPLOITATION DES PROCEDES GEORGES CLAUDE",
+      "phrase": "Il tient compte des spécificités des activités et des métiers du Groupe, en prenant notamment en considération pour la fixation de l’objectif de -33 % en 2035 : ■ les dépendances aux politiques et réglementations, en particulier en ce qui concerne le développement des marchés pour les produits à faible teneur en carbone ainsi que le développement des actifs de production et des infrastructures pertinentes pour les énergies à faible teneur en carbone et les énergies renouvelables ; ■ le temps nécessaire pour la mise à l'échelle industrielle et le déploiement de nouvelles technologies telles que l'électrolyse.",
+      "verite": true,
+      "llm": false
+    },
+    {
+      "entreprise": "L'OREAL",
+      "phrase": "(3)Cet objectif est issu du réalignement en 2025 du programme L'Oréal pour le Futur visant initialement « 100 % des ingrédients des formules et des matériaux d’emballage biosourcés soient traçables et issus de sources durables d'ici à 2030 » publié dans le rapport 2024.",
+      "verite": false,
+      "llm": true
+    },
+    {
+      "entreprise": "SAFRAN",
+      "phrase": "Safran s’était donné pour objectif initial d’atteindre 22 % de femmes parmi les cadres dirigeants de l’ensemble du Groupe en 2025.",
+      "verite": false,
+      "llm": true
+    },
+    {
+      "entreprise": "SANOFI",
+      "phrase": "Le tableau ci-dessous détaille les leviers à actionner pour atteindre l'objectif de scope 3, à savoir une réduction de 30 % des émissions de GES à l'horizon 2030, par rapport à la référence de 2019, ainsi que les progrès réalisés à ce jour.",
+      "verite": true,
+      "llm": false
+    },
+    {
+      "entreprise": "SCHNEIDER ELECTRIC SE",
+      "phrase": "D’ici 2025, Schneider Electric accélèrera encore ses engagements locaux : • 100 % des sites définieront un programme local de conservation et de restauration de la biodiversité ;",
+      "verite": true,
+      "llm": false
+    },
+    {
+      "entreprise": "SCHNEIDER ELECTRIC SE",
+      "phrase": "Objectifs et indicateurs Cycle Objectifs (1) Description 2021-2025 SSE #20 Payer 100 % de nos employés au minimum un salaire décent 2026-2030 Hors Sustainability Impact 2030 100% des salariés payés au minimum un salaire décent Dans le cadre de son engagement envers le SSE #20, le Groupe a mené une analyse.",
+      "verite": true,
+      "llm": false
+    },
+    {
+      "entreprise": "TotalEnergies SE",
+      "phrase": "–Pilotage de la stratégie de transformation de la Société vers la neutralité carbone, en ligne avec les objectifs 2020/2030 communiqués en septembre 2020 aux investisseurs, et notamment la croissance dans la production d’énergies centrée sur les deux piliers gaz et énergie renouvelable/électricité, ainsi que l’évolution vers un mix de ventes constitué à hauteur de 35% de pétrole, de 50% de gaz et de 15% d’électrons, pour un maximum de 15% ;",
+      "verite": false,
+      "llm": true
+    },
+    {
+      "entreprise": "TotalEnergies SE",
+      "phrase": "Cet objectif de baisse de 40% des émissions nettes246 de GES (Scope 1+2) pour les activités opérées est en phase avec l'objectif de baisse du programme « Fit for 55 » de l'Union Européenne (-37% entre 2015 et 2030) et du scénario Net Zero Emissions publié par l'AIE en 2022 (-35% entre 2015 et 2030).",
+      "verite": true,
+      "llm": false
+    }
+  ]
+}
